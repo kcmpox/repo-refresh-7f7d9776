@@ -732,6 +732,15 @@ function TripsListSection() {
                       variant="ghost"
                       size="icon"
                       disabled={locked}
+                      title={locked ? "Viagem em recebimento" : "Arquivar"}
+                      onClick={() => archive(t.id)}
+                    >
+                      <Archive className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={locked}
                       title={locked ? "Viagem em recebimento" : "Excluir"}
                       onClick={() => remove(t.id)}
                     >
