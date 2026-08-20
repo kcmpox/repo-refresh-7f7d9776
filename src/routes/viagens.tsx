@@ -231,7 +231,8 @@ function TripsPage() {
 }
 
 function TripsListSection() {
-  const [trips, setTrips] = useTrips();
+  const [allTrips, setTrips] = useTrips();
+  const trips = useMemo(() => allTrips.filter((t) => !t.archived), [allTrips]);
   const [trucks] = useTrucks();
   const [drivers] = useDrivers();
   const [tables] = usePriceTables();
@@ -248,6 +249,7 @@ function TripsListSection() {
   const [driverFilter, setDriverFilter] = useState<string>("__all__");
   const [truckFilter, setTruckFilter] = useState<string>("__all__");
   const [statusFilter, setStatusFilter] = useState<"__all__" | "aberto" | "pago">("__all__");
+  const [destFilter, setDestFilter] = useState<"__all__" | Destination>("__all__");
   const [page, setPage] = useState(1);
 
   const hasCurrentTable = tables.some((t) => t.name === "ATUAL");
@@ -261,11 +263,12 @@ function TripsListSection() {
       if (driverFilter !== "__all__" && driverFilter !== "__none__" && t.driverId !== driverFilter)
         return false;
       if (truckFilter !== "__all__" && t.truckId !== truckFilter) return false;
+      if (destFilter !== "__all__" && t.destination !== destFilter) return false;
       if (statusFilter === "aberto" && lockedTripIds.has(t.id)) return false;
       if (statusFilter === "pago" && !lockedTripIds.has(t.id)) return false;
       return true;
     });
-  }, [trips, dateFrom, dateTo, driverFilter, truckFilter, statusFilter, lockedTripIds]);
+  }, [trips, dateFrom, dateTo, driverFilter, truckFilter, destFilter, statusFilter, lockedTripIds]);
 
   const sorted = useMemo(
     () => [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
@@ -280,7 +283,7 @@ function TripsListSection() {
   );
   useMemo(() => {
     setPage(1);
-  }, [dateFrom, dateTo, driverFilter, truckFilter, statusFilter]);
+  }, [dateFrom, dateTo, driverFilter, truckFilter, destFilter, statusFilter]);
 
   const remove = (id: string) => {
     if (lockedTripIds.has(id)) {
@@ -289,6 +292,15 @@ function TripsListSection() {
     }
     setTrips((prev) => prev.filter((t) => t.id !== id));
     toast.success("Viagem removida");
+  };
+
+  const archive = (id: string) => {
+    if (lockedTripIds.has(id)) {
+      toast.error("Viagem está em um recebimento. Exclua o recebimento antes de arquivar.");
+      return;
+    }
+    setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, archived: true } : t)));
+    toast.success("Viagem arquivada");
   };
 
   const generatePDF = async () => {
