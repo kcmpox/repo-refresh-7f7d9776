@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  useTrips,
+  useActiveTrips,
   useTrucks,
   useDrivers,
   formatBRL,
@@ -57,7 +57,7 @@ function formatTime(iso?: string) {
 }
 
 export function DepartureArrivalSection() {
-  const [trips, setTrips] = useTrips();
+  const [trips, setTrips] = useActiveTrips();
   const [trucks] = useTrucks();
   const [drivers] = useDrivers();
   const [truckFilter, setTruckFilter] = useState<string>("__all__");

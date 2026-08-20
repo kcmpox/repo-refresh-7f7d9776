@@ -3,7 +3,7 @@ import {
   usePayments,
   useAdjustments,
   useBonuses,
-  useTrips,
+  useActiveTrips,
   useTrucks,
   useFuelings,
   useExpenses,
@@ -457,7 +457,7 @@ function AdjustmentDialog({
   onSaved?: () => void;
 }) {
   const [, setAdjustments] = useAdjustments();
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<PaymentAdjustment["type"]>("correcao");
   const [amount, setAmount] = useState("");
@@ -657,7 +657,7 @@ function AdjustmentDialog({
 function BonusTab() {
   const [bonuses, setBonuses] = useBonuses();
   const [payments] = usePayments();
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const [adjustments, setAdjustments] = useAdjustments();
   const [monthYYYYMM, setMonth] = useState(
     new Date().toISOString().slice(0, 7),
@@ -1021,7 +1021,7 @@ function StatCard({
 // ---------- Botão de PDF do recebimento (com ajustes) ----------
 
 function PaymentPdfButton({ payment }: { payment: Payment }) {
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const [fuelings] = useFuelings();
   const [expenses] = useExpenses();
   const [tolls] = useTolls();

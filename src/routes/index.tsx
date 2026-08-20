@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
-  useTrips,
+  useActiveTrips,
   useTrucks,
   usePriceTiers,
   useFuelings,
@@ -47,7 +47,7 @@ function fuelingTotal(items: { quantity: number; unitPrice: number }[]) {
 }
 
 function Index() {
-  const [allTrips] = useTrips();
+  const [allTrips] = useActiveTrips();
   const [trucks] = useTrucks();
   const [tiers] = usePriceTiers();
   const [allFuelings] = useFuelings();

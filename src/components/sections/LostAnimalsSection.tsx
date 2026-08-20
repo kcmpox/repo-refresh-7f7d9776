@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  useTrips,
+  useActiveTrips,
   useTrucks,
   useDrivers,
   formatBRL,
@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export function LostAnimalsSection() {
-  const [trips, setTrips] = useTrips();
+  const [trips, setTrips] = useActiveTrips();
   const [trucks] = useTrucks();
   const [drivers] = useDrivers();
   const [dialogTrip, setDialogTrip] = useState<Trip | null>(null);

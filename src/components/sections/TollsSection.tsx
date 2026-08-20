@@ -5,7 +5,7 @@ import {
   useTrucks,
   useDrivers,
   usePayments,
-  useTrips,
+  useActiveTrips,
   useSettings,
   uid,
   formatBRL,
@@ -112,7 +112,7 @@ export function TollsSection() {
   const [trucks] = useTrucks();
   const [drivers] = useDrivers();
   const [payments] = usePayments();
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const lockedIds = useMemo(() => new Set(payments.flatMap((p) => p.tollIds)), [payments]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Toll | null>(null);
@@ -742,7 +742,7 @@ function TollDialog({ toll, onSaved }: { toll: Toll | null; onSaved: () => void 
   const [tollLocations] = useTollLocations();
   const [trucks] = useTrucks();
   const [drivers] = useDrivers();
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
 
   const availableDrivers = useMemo(
     () => drivers.filter((d) => d.active || d.id === toll?.driverId),
