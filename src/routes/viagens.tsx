@@ -59,6 +59,8 @@ import {
   PawPrint,
   History as HistoryIcon,
   CircleDot,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AttachmentsField, AttachmentsList } from "@/components/Attachments";
@@ -84,7 +86,7 @@ import { HistorySection } from "@/components/sections/HistorySection";
 // Sidebar navigation
 // ---------------------------------------------------------------------------
 
-type TripSectionKey = "viagens" | "saida" | "perdas" | "historico";
+type TripSectionKey = "viagens" | "saida" | "perdas" | "historico" | "arquivadas";
 
 const TRIP_NAV_ITEMS: {
   key: TripSectionKey;
@@ -115,6 +117,12 @@ const TRIP_NAV_ITEMS: {
     label: "Histórico",
     icon: HistoryIcon,
     desc: "Linha do tempo de eventos",
+  },
+  {
+    key: "arquivadas",
+    label: "Arquivadas",
+    icon: Archive,
+    desc: "Viagens arquivadas — desarquive quando precisar",
   },
 ];
 
@@ -215,6 +223,7 @@ function TripsPage() {
           {section === "saida" && <DepartureArrivalSection />}
           {section === "perdas" && <LostAnimalsSection />}
           {section === "historico" && <HistorySection />}
+          {section === "arquivadas" && <ArchivedTripsSection />}
         </div>
       </div>
     </div>
@@ -222,7 +231,8 @@ function TripsPage() {
 }
 
 function TripsListSection() {
-  const [trips, setTrips] = useTrips();
+  const [allTrips, setTrips] = useTrips();
+  const trips = useMemo(() => allTrips.filter((t) => !t.archived), [allTrips]);
   const [trucks] = useTrucks();
   const [drivers] = useDrivers();
   const [tables] = usePriceTables();
@@ -239,6 +249,7 @@ function TripsListSection() {
   const [driverFilter, setDriverFilter] = useState<string>("__all__");
   const [truckFilter, setTruckFilter] = useState<string>("__all__");
   const [statusFilter, setStatusFilter] = useState<"__all__" | "aberto" | "pago">("__all__");
+  const [destFilter, setDestFilter] = useState<"__all__" | Destination>("__all__");
   const [page, setPage] = useState(1);
 
   const hasCurrentTable = tables.some((t) => t.name === "ATUAL");
@@ -252,11 +263,12 @@ function TripsListSection() {
       if (driverFilter !== "__all__" && driverFilter !== "__none__" && t.driverId !== driverFilter)
         return false;
       if (truckFilter !== "__all__" && t.truckId !== truckFilter) return false;
+      if (destFilter !== "__all__" && t.destination !== destFilter) return false;
       if (statusFilter === "aberto" && lockedTripIds.has(t.id)) return false;
       if (statusFilter === "pago" && !lockedTripIds.has(t.id)) return false;
       return true;
     });
-  }, [trips, dateFrom, dateTo, driverFilter, truckFilter, statusFilter, lockedTripIds]);
+  }, [trips, dateFrom, dateTo, driverFilter, truckFilter, destFilter, statusFilter, lockedTripIds]);
 
   const sorted = useMemo(
     () => [...filtered].sort((a, b) => b.date.localeCompare(a.date)),
@@ -271,7 +283,7 @@ function TripsListSection() {
   );
   useMemo(() => {
     setPage(1);
-  }, [dateFrom, dateTo, driverFilter, truckFilter, statusFilter]);
+  }, [dateFrom, dateTo, driverFilter, truckFilter, destFilter, statusFilter]);
 
   const remove = (id: string) => {
     if (lockedTripIds.has(id)) {
@@ -280,6 +292,15 @@ function TripsListSection() {
     }
     setTrips((prev) => prev.filter((t) => t.id !== id));
     toast.success("Viagem removida");
+  };
+
+  const archive = (id: string) => {
+    if (lockedTripIds.has(id)) {
+      toast.error("Viagem está em um recebimento. Exclua o recebimento antes de arquivar.");
+      return;
+    }
+    setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, archived: true } : t)));
+    toast.success("Viagem arquivada");
   };
 
   const generatePDF = async () => {
@@ -525,6 +546,22 @@ function TripsListSection() {
             </Select>
           </div>
           <div>
+            <Label className="text-xs">Destino</Label>
+            <Select
+              value={destFilter}
+              onValueChange={(v) => setDestFilter(v as typeof destFilter)}
+            >
+              <SelectTrigger className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todos</SelectItem>
+                <SelectItem value="bataguassu">{DESTINATION_LABELS.bataguassu}</SelectItem>
+                <SelectItem value="cassilandia">{DESTINATION_LABELS.cassilandia}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label className="text-xs">Status</Label>
             <Select
               value={statusFilter}
@@ -544,6 +581,7 @@ function TripsListSection() {
             dateTo ||
             driverFilter !== "__all__" ||
             truckFilter !== "__all__" ||
+            destFilter !== "__all__" ||
             statusFilter !== "__all__") && (
             <Button
               variant="ghost"
@@ -553,6 +591,7 @@ function TripsListSection() {
                 setDateTo("");
                 setDriverFilter("__all__");
                 setTruckFilter("__all__");
+                setDestFilter("__all__");
                 setStatusFilter("__all__");
               }}
             >
@@ -693,6 +732,15 @@ function TripsListSection() {
                       variant="ghost"
                       size="icon"
                       disabled={locked}
+                      title={locked ? "Viagem em recebimento" : "Arquivar"}
+                      onClick={() => archive(t.id)}
+                    >
+                      <Archive className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={locked}
                       title={locked ? "Viagem em recebimento" : "Excluir"}
                       onClick={() => remove(t.id)}
                     >
@@ -732,6 +780,97 @@ const WIZARD_STEPS = [
   "Distância",
   "Valores & Finalização",
 ];
+
+function ArchivedTripsSection() {
+  const [allTrips, setTrips] = useTrips();
+  const [trucks] = useTrucks();
+  const [drivers] = useDrivers();
+  const archived = useMemo(
+    () => allTrips.filter((t) => t.archived).sort((a, b) => b.date.localeCompare(a.date)),
+    [allTrips],
+  );
+
+  const unarchive = (id: string) => {
+    setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, archived: false } : t)));
+    toast.success("Viagem desarquivada");
+  };
+
+  const remove = (id: string) => {
+    if (!window.confirm("Excluir definitivamente esta viagem arquivada?")) return;
+    setTrips((prev) => prev.filter((t) => t.id !== id));
+    toast.success("Viagem removida");
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Viagens arquivadas</h2>
+        <p className="text-sm text-muted-foreground">
+          Viagens arquivadas não aparecem em recebimentos, relatórios nem nas demais telas.
+        </p>
+      </div>
+      {archived.length === 0 ? (
+        <Card className="p-10 text-center text-muted-foreground">Nenhuma viagem arquivada.</Card>
+      ) : (
+        <div className="space-y-3">
+          {archived.map((t) => {
+            const truck = trucks.find((x) => x.id === t.truckId);
+            const driver = drivers.find((x) => x.id === t.driverId);
+            return (
+              <Card key={t.id} className="p-4 shadow-soft">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary">
+                        <Archive className="mr-1 h-3 w-3" /> Arquivada
+                      </Badge>
+                      {t.destination && (
+                        <Badge variant="outline">{DESTINATION_LABELS[t.destination]}</Badge>
+                      )}
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        {formatDateBR(t.date)}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <TruckIcon className="h-3 w-3" />
+                        {truck?.name ?? "—"}
+                      </span>
+                      {driver && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <UserIcon className="h-3 w-3" />
+                          {driver.name}
+                        </span>
+                      )}
+                    </div>
+                    <p className="flex items-center gap-2 font-semibold">
+                      <MapPin className="h-4 w-4 text-accent" />
+                      {t.origin} <span className="text-muted-foreground">→</span>{" "}
+                      {t.destination ? DESTINATION_LABELS[t.destination] : "-"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-lg font-bold text-primary">{formatBRL(t.finalValue)}</p>
+                    <Button variant="outline" size="sm" onClick={() => unarchive(t.id)}>
+                      <ArchiveRestore className="mr-1 h-4 w-4" /> Desarquivar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Excluir"
+                      onClick={() => remove(t.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function TripDialog({ trip, onSaved }: { trip: Trip | null; onSaved: () => void }) {
   const [, setTrips] = useTrips();
@@ -1375,7 +1514,7 @@ function EditTripDialog({ trip, onSaved }: { trip: Trip; onSaved: () => void }) 
   );
   const [attachments, setAttachments] = useState<Attachment[]>(trip.attachments ?? []);
 
-  const selectedTable = destTables.find((t) => t.id === priceTableId) ?? null;
+  const selectedTable = destTables.find((t) => t.id === priceTableId);
   const km = getDistance(trip);
   const tableValue = calculateTripValue(
     selectedTable,

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  useTrips,
+  useActiveTrips,
   useTrucks,
   useTolls,
   useFuelings,
@@ -43,7 +43,7 @@ type HistoryEntry = {
 };
 
 export function HistorySection() {
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const [trucks] = useTrucks();
   const [tolls] = useTolls();
   const [fuelings] = useFuelings();

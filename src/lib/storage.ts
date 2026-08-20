@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 export type CattleType = "magro" | "gordo";
 
@@ -91,6 +91,8 @@ export interface Trip {
   lostAnimalsConfirmed?: boolean;
   /** When true, the trip is excluded from departure/arrival and history tracking. */
   skipTracking?: boolean;
+  /** When true, the trip is archived: hidden from recebimentos, relatórios e demais telas. */
+  archived?: boolean;
 }
 
 export interface FuelingItem {
@@ -341,6 +343,12 @@ export const useTrucks = () => useStored<Truck[]>(KEYS.trucks, []);
 export const useDrivers = () => useStored<Driver[]>(KEYS.drivers, []);
 export const usePriceTables = () => useStored<PriceTable[]>(KEYS.priceTables, []);
 export const useTrips = () => useStored<Trip[]>(KEYS.trips, []);
+/** Trips excluding archived ones. The setter still operates on the full list. */
+export const useActiveTrips = () => {
+  const [trips, setTrips] = useTrips();
+  const activeTrips = useMemo(() => trips.filter((t) => !t.archived), [trips]);
+  return [activeTrips, setTrips] as const;
+};
 export const useFuelings = () => useStored<Fueling[]>(KEYS.fuelings, []);
 export const useExpenses = () => useStored<Expense[]>(KEYS.expenses, []);
 export const useTolls = () => useStored<Toll[]>(KEYS.tolls, []);

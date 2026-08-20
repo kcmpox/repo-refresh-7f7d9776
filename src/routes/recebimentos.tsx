@@ -6,7 +6,7 @@ import { AdjustmentsSection } from "@/components/sections/AdjustmentsSection";
 import { Banknote as BanknoteIcon, Users as UsersIcon, Scale as ScaleIcon } from "lucide-react";
 import {
   usePayments,
-  useTrips,
+  useActiveTrips,
   useFuelings,
   useExpenses,
   useTolls,
@@ -123,7 +123,7 @@ function totalFuel(f: Fueling) {
 
 function ReceiptsTab() {
   const [payments, setPayments] = usePayments();
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const [fuelings] = useFuelings();
   const [expenses] = useExpenses();
   const [tolls] = useTolls();
@@ -556,7 +556,7 @@ function ReceiptsTab() {
 
 function ReceiptDialog({ onSaved }: { onSaved: () => void }) {
   const [payments, setPayments] = usePayments();
-  const [trips, setTrips] = useTrips();
+  const [trips, setTrips] = useActiveTrips();
   const [fuelings] = useFuelings();
   const [expenses] = useExpenses();
   const [tolls] = useTolls();
@@ -1303,11 +1303,11 @@ type RegistryFile = {
 
 function ImportReceiptButton() {
   const [, setPayments] = usePayments();
-  const [, setTrips] = useTrips();
+  const [, setTrips] = useActiveTrips();
   const [, setFuelings] = useFuelings();
   const [, setExpenses] = useExpenses();
   const [, setTolls] = useTolls();
-  const [trips] = useTrips();
+  const [trips] = useActiveTrips();
   const [fuelings] = useFuelings();
   const [expenses] = useExpenses();
   const [tolls] = useTolls();

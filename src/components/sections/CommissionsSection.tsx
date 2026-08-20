@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import {
-  useTrips,
+  useActiveTrips,
   useDrivers,
   useDriverEntries,
   useCommissionPayments,
@@ -124,7 +124,7 @@ interface DriverPeriodCard {
 }
 
 export function CommissionsSection() {
-  const [trips, setTrips] = useTrips();
+  const [trips, setTrips] = useActiveTrips();
   const [drivers] = useDrivers();
   const [entries] = useDriverEntries();
   const [tables] = usePriceTables();
