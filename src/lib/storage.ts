@@ -91,6 +91,8 @@ export interface Trip {
   lostAnimalsConfirmed?: boolean;
   /** When true, the trip is excluded from departure/arrival and history tracking. */
   skipTracking?: boolean;
+  /** When true, the trip is archived: hidden from recebimentos, relatórios e demais telas. */
+  archived?: boolean;
 }
 
 export interface FuelingItem {
