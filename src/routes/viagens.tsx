@@ -781,6 +781,104 @@ const WIZARD_STEPS = [
   "Valores & Finalização",
 ];
 
+function ArchivedTripsSection() {
+  const [allTrips, setTrips] = useTrips();
+  const [trucks] = useTrucks();
+  const [drivers] = useDrivers();
+  const archived = useMemo(
+    () => allTrips.filter((t) => t.archived).sort((a, b) => b.date.localeCompare(a.date)),
+    [allTrips],
+  );
+
+  const unarchive = (id: string) => {
+    setTrips((prev) => prev.map((t) => (t.id === id ? { ...t, archived: false } : t)));
+    toast.success("Viagem desarquivada");
+  };
+
+  const remove = (id: string) => {
+    if (!window.confirm("Excluir definitivamente esta viagem arquivada?")) return;
+    setTrips((prev) => prev.filter((t) => t.id !== id));
+    toast.success("Viagem removida");
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Viagens arquivadas</h2>
+        <p className="text-sm text-muted-foreground">
+          Viagens arquivadas não aparecem em recebimentos, relatórios nem nas demais telas.
+        </p>
+      </div>
+      {archived.length === 0 ? (
+        <Card className="p-10 text-center text-muted-foreground">Nenhuma viagem arquivada.</Card>
+      ) : (
+        <div className="space-y-3">
+          {archived.map((t) => {
+            const truck = trucks.find((x) => x.id === t.truckId);
+            const driver = drivers.find((x) => x.id === t.driverId);
+            return (
+              <Card key={t.id} className="p-4 shadow-soft">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary">
+                        <Archive className="mr-1 h-3 w-3" /> Arquivada
+                      </Badge>
+                      {t.destination && (
+                        <Badge variant="outline">{DESTINATION_LABELS[t.destination]}</Badge>
+                      )}
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        {formatDateBR(t.date)}
+                      </span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <TruckIcon className="h-3 w-3" />
+                        {truck?.name ?? "—"}
+                      </span>
+                      {driver && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <UserIcon className="h-3 w-3" />
+                          {driver.name}
+                        </span>
+                      )}
+                    </div>
+                    <p className="flex items-center gap-2 font-semibold">
+                      <MapPin className="h-4 w-4 text-accent" />
+                      {t.origin} <span className="text-muted-foreground">→</span>{" "}
+                      {t.destination ? DESTINATION_LABELS[t.destination] : "-"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-lg font-bold text-primary">{formatBRL(t.finalValue)}</p>
+                    <Button variant="outline" size="sm" onClick={() => unarchive(t.id)}>
+                      <ArchiveRestore className="mr-1 h-4 w-4" /> Desarquivar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      title="Excluir"
+                      onClick={() => remove(t.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const WIZARD_STEPS_UNUSED = [
+  "Gado & Motorista",
+  "Rota & Documentos",
+  "Distância",
+  "Valores & Finalização",
+];
+
 function TripDialog({ trip, onSaved }: { trip: Trip | null; onSaved: () => void }) {
   const [, setTrips] = useTrips();
   const [trucks] = useTrucks();
