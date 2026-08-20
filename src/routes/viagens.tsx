@@ -59,6 +59,8 @@ import {
   PawPrint,
   History as HistoryIcon,
   CircleDot,
+  Archive,
+  ArchiveRestore,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AttachmentsField, AttachmentsList } from "@/components/Attachments";
@@ -84,7 +86,7 @@ import { HistorySection } from "@/components/sections/HistorySection";
 // Sidebar navigation
 // ---------------------------------------------------------------------------
 
-type TripSectionKey = "viagens" | "saida" | "perdas" | "historico";
+type TripSectionKey = "viagens" | "saida" | "perdas" | "historico" | "arquivadas";
 
 const TRIP_NAV_ITEMS: {
   key: TripSectionKey;
@@ -115,6 +117,12 @@ const TRIP_NAV_ITEMS: {
     label: "Histórico",
     icon: HistoryIcon,
     desc: "Linha do tempo de eventos",
+  },
+  {
+    key: "arquivadas",
+    label: "Arquivadas",
+    icon: Archive,
+    desc: "Viagens arquivadas — desarquive quando precisar",
   },
 ];
 
@@ -215,6 +223,7 @@ function TripsPage() {
           {section === "saida" && <DepartureArrivalSection />}
           {section === "perdas" && <LostAnimalsSection />}
           {section === "historico" && <HistorySection />}
+          {section === "arquivadas" && <ArchivedTripsSection />}
         </div>
       </div>
     </div>
