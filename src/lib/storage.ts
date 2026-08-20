@@ -101,6 +101,8 @@ export interface FuelingItem {
   quantity: number;
   unitPrice: number;
   discount?: number;
+  /** Responsabilidade específica do item. Sem valor, usa a do registro. */
+  responsibility?: ExpenseResponsibility;
 }
 
 export interface Fueling {

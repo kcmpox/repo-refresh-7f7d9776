@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { AttachmentsField, AttachmentsList } from "@/components/Attachments";
 import { Pagination, PAGE_SIZE } from "@/components/Pagination";
 import { JsonEditorDialog } from "@/components/JsonEditorDialog";
+import { TruckNav, type TruckNavItem } from "@/components/TruckNav";
 import {
   buildPdfDoc,
   previewPdf,
@@ -113,6 +114,28 @@ function ExpensesPage() {
   useMemo(() => {
     setPage(1);
   }, [dateFrom, dateTo, driverFilter, truckFilter, statusFilter]);
+
+  const navItems = useMemo<TruckNavItem[]>(() => {
+    const items: TruckNavItem[] = [
+      {
+        key: "__all__",
+        label: "Todas as manutenções",
+        desc: "Ver todos os registros",
+        icon: Wrench,
+        count: expenses.length,
+      },
+    ];
+    for (const tr of trucks) {
+      items.push({
+        key: tr.id,
+        label: tr.name,
+        desc: tr.plate,
+        icon: TruckIcon,
+        count: expenses.filter((e) => e.truckId === tr.id).length,
+      });
+    }
+    return items;
+  }, [trucks, expenses]);
 
   const remove = (id: string) => {
     if (lockedIds.has(id)) {
