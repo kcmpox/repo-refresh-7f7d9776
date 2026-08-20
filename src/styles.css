@@ -62,26 +62,30 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.5rem;
+  --background: oklch(0.985 0.012 90);
+  --foreground: oklch(0.22 0.04 50);
+  --card: oklch(0.995 0.008 90);
+  --card-foreground: oklch(0.22 0.04 50);
+  --popover: oklch(0.995 0.008 90);
+  --popover-foreground: oklch(0.22 0.04 50);
+  --primary: oklch(0.42 0.12 45);
+  --primary-foreground: oklch(0.985 0.012 90);
+  --secondary: oklch(0.93 0.03 80);
+  --secondary-foreground: oklch(0.28 0.06 50);
+  --muted: oklch(0.94 0.02 85);
+  --muted-foreground: oklch(0.48 0.04 60);
+  --accent: oklch(0.72 0.16 60);
+  --accent-foreground: oklch(0.18 0.03 50);
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.985 0.012 90);
+  --border: oklch(0.88 0.03 75);
+  --input: oklch(0.9 0.02 80);
+  --ring: oklch(0.42 0.12 45);
+  --gradient-hero: linear-gradient(135deg, oklch(0.42 0.12 45), oklch(0.55 0.14 55));
+  --gradient-warm: linear-gradient(160deg, oklch(0.985 0.012 90), oklch(0.94 0.03 80));
+  --shadow-soft: 0 2px 12px -2px oklch(0.3 0.06 50 / 0.12);
+  --shadow-elegant: 0 12px 40px -10px oklch(0.42 0.12 45 / 0.35);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +144,48 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: 'Inter', system-ui, sans-serif;
   }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-hero { background: var(--gradient-hero); }
+  .bg-gradient-warm { background: var(--gradient-warm); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+}
+
+/*
+ * Dark theme — activated by adding `.dark` on <html>.
+ * Warm, cattle-industry inspired palette (dark leather + amber accents).
+ */
+html.dark {
+  --background: oklch(0.18 0.02 55);
+  --foreground: oklch(0.96 0.02 85);
+  --card: oklch(0.23 0.03 55);
+  --card-foreground: oklch(0.96 0.02 85);
+  --popover: oklch(0.23 0.03 55);
+  --popover-foreground: oklch(0.96 0.02 85);
+  --primary: oklch(0.72 0.16 60);
+  --primary-foreground: oklch(0.18 0.03 50);
+  --secondary: oklch(0.28 0.03 55);
+  --secondary-foreground: oklch(0.96 0.02 85);
+  --muted: oklch(0.26 0.02 55);
+  --muted-foreground: oklch(0.72 0.03 75);
+  --accent: oklch(0.75 0.16 60);
+  --accent-foreground: oklch(0.18 0.03 50);
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(0.98 0.02 85);
+  --border: oklch(1 0 0 / 0.12);
+  --input: oklch(1 0 0 / 0.15);
+  --ring: oklch(0.72 0.16 60);
+  --gradient-hero: linear-gradient(135deg, oklch(0.42 0.12 45), oklch(0.62 0.16 60));
+  --gradient-warm: linear-gradient(160deg, oklch(0.18 0.02 55), oklch(0.22 0.03 50));
+  --shadow-soft: 0 2px 12px -2px oklch(0 0 0 / 0.5);
+  --shadow-elegant: 0 12px 40px -10px oklch(0 0 0 / 0.7);
 }
