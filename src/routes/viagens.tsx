@@ -546,6 +546,22 @@ function TripsListSection() {
             </Select>
           </div>
           <div>
+            <Label className="text-xs">Destino</Label>
+            <Select
+              value={destFilter}
+              onValueChange={(v) => setDestFilter(v as typeof destFilter)}
+            >
+              <SelectTrigger className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todos</SelectItem>
+                <SelectItem value="bataguassu">{DESTINATION_LABELS.bataguassu}</SelectItem>
+                <SelectItem value="cassilandia">{DESTINATION_LABELS.cassilandia}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label className="text-xs">Status</Label>
             <Select
               value={statusFilter}
@@ -565,6 +581,7 @@ function TripsListSection() {
             dateTo ||
             driverFilter !== "__all__" ||
             truckFilter !== "__all__" ||
+            destFilter !== "__all__" ||
             statusFilter !== "__all__") && (
             <Button
               variant="ghost"
@@ -574,6 +591,7 @@ function TripsListSection() {
                 setDateTo("");
                 setDriverFilter("__all__");
                 setTruckFilter("__all__");
+                setDestFilter("__all__");
                 setStatusFilter("__all__");
               }}
             >
