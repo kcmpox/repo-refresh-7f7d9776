@@ -872,13 +872,6 @@ function ArchivedTripsSection() {
   );
 }
 
-const WIZARD_STEPS_UNUSED = [
-  "Gado & Motorista",
-  "Rota & Documentos",
-  "Distância",
-  "Valores & Finalização",
-];
-
 function TripDialog({ trip, onSaved }: { trip: Trip | null; onSaved: () => void }) {
   const [, setTrips] = useTrips();
   const [trucks] = useTrucks();
