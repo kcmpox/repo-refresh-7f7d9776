@@ -1375,7 +1375,7 @@ function EditTripDialog({ trip, onSaved }: { trip: Trip; onSaved: () => void }) 
   );
   const [attachments, setAttachments] = useState<Attachment[]>(trip.attachments ?? []);
 
-  const selectedTable = destTables.find((t) => t.id === priceTableId) ?? null;
+  const selectedTable = destTables.find((t) => t.id === priceTableId);
   const km = getDistance(trip);
   const tableValue = calculateTripValue(
     selectedTable,
