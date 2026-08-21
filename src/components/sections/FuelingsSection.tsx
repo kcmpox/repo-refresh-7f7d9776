@@ -43,6 +43,7 @@ import { AttachmentsField, AttachmentsList } from "@/components/Attachments";
 import type { Attachment } from "@/lib/storage";
 import { Pagination, PAGE_SIZE } from "@/components/Pagination";
 import { JsonEditorDialog } from "@/components/JsonEditorDialog";
+import { TruckNav, type TruckNavItem } from "@/components/TruckNav";
 import {
   buildPdfDoc,
   previewPdf,
@@ -57,6 +58,11 @@ import {
 export function fuelResponsibility(f: Fueling): ExpenseResponsibility {
   if (f.responsibility) return f.responsibility;
   return f.deductFromPayment ? "desconto" : "minha";
+}
+
+/** Responsabilidade de um item: a do próprio item ou, na falta, a do registro. */
+export function itemResponsibility(f: Fueling, item: FuelingItem): ExpenseResponsibility {
+  return item.responsibility ?? fuelResponsibility(f);
 }
 
 const FUEL_RESP_LABEL: Record<ExpenseResponsibility, string> = {
@@ -125,6 +131,28 @@ function FuelingsPage() {
   useMemo(() => {
     setPage(1);
   }, [dateFrom, dateTo, driverFilter, truckFilter, statusFilter]);
+
+  const navItems = useMemo<TruckNavItem[]>(() => {
+    const items: TruckNavItem[] = [
+      {
+        key: "__all__",
+        label: "Todos os abastecimentos",
+        desc: "Ver todos os registros",
+        icon: Fuel,
+        count: fuelings.length,
+      },
+    ];
+    for (const tr of trucks) {
+      items.push({
+        key: tr.id,
+        label: tr.name,
+        desc: tr.plate,
+        icon: TruckIcon,
+        count: fuelings.filter((f) => f.truckId === tr.id).length,
+      });
+    }
+    return items;
+  }, [trucks, fuelings]);
 
   // Para km/l: precisamos do hodômetro anterior do mesmo caminhão (anterior em data)
   const prevOdometer = (f: Fueling): number | null => {
@@ -291,6 +319,9 @@ function FuelingsPage() {
         </div>
       </div>
 
+      <div className="grid gap-6 md:grid-cols-[220px_1fr]">
+        <TruckNav items={navItems} value={truckFilter} onChange={setTruckFilter} />
+        <div className="space-y-6">
       <Card className="p-4 shadow-soft">
         <div className="flex flex-wrap items-end gap-3">
           <div>
@@ -310,22 +341,6 @@ function FuelingsPage() {
               onChange={(e) => setDateTo(e.target.value)}
               className="w-44"
             />
-          </div>
-          <div>
-            <Label className="text-xs">Caminhão</Label>
-            <Select value={truckFilter} onValueChange={setTruckFilter}>
-              <SelectTrigger className="w-52">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">Todos</SelectItem>
-                {trucks.map((tr) => (
-                  <SelectItem key={tr.id} value={tr.id}>
-                    {tr.name} ({tr.plate})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <div>
             <Label className="text-xs">Motorista</Label>
@@ -434,7 +449,11 @@ function FuelingsPage() {
                         </span>
                       )}
                       {(() => {
-                        const r = fuelResponsibility(f);
+                        const set = new Set(f.items.map((it) => itemResponsibility(f, it)));
+                        if (set.size > 1) {
+                          return <Badge variant="outline">Misto</Badge>;
+                        }
+                        const r = [...set][0] ?? fuelResponsibility(f);
                         return (
                           <Badge
                             variant={
@@ -467,14 +486,19 @@ function FuelingsPage() {
                     </p>
                     <ul className="text-sm text-muted-foreground space-y-0.5">
                       {f.items.map((it, idx) => (
-                        <li key={idx}>
-                          {it.kind === "combustivel" ? "⛽ " : "• "}
-                          {it.description ||
-                            (it.kind === "combustivel" ? "Combustível" : "Item")} —{" "}
-                          {it.quantity.toFixed(3).replace(".", ",")}
-                          {it.kind === "combustivel" ? " L" : ""} × {formatBRL(it.unitPrice)}
-                          {it.discount ? ` - ${formatBRL(it.discount)}` : ""} ={" "}
-                          {formatBRL(it.quantity * it.unitPrice - (it.discount || 0))}
+                        <li key={idx} className="flex flex-wrap items-center gap-1">
+                          <span>
+                            {it.kind === "combustivel" ? "⛽ " : "• "}
+                            {it.description ||
+                              (it.kind === "combustivel" ? "Combustível" : "Item")}{" "}
+                            — {it.quantity.toFixed(3).replace(".", ",")}
+                            {it.kind === "combustivel" ? " L" : ""} × {formatBRL(it.unitPrice)}
+                            {it.discount ? ` - ${formatBRL(it.discount)}` : ""} ={" "}
+                            {formatBRL(it.quantity * it.unitPrice - (it.discount || 0))}
+                          </span>
+                          <Badge variant="outline" className="text-[10px]">
+                            {FUEL_RESP_LABEL[itemResponsibility(f, it)]}
+                          </Badge>
                         </li>
                       ))}
                     </ul>
@@ -540,6 +564,8 @@ function FuelingsPage() {
           <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
+        </div>
+      </div>
 
       <JsonEditorDialog
         open={jsonEditOpen}
@@ -821,11 +847,37 @@ function FuelingDialog({
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
-              <div className="col-span-12 text-right text-xs text-muted-foreground">
-                Subtotal:{" "}
-                {formatBRL(
-                  Number(it.quantity || 0) * Number(it.unitPrice || 0) - Number(it.discount || 0),
-                )}
+              <div className="col-span-12 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs whitespace-nowrap">Responsável</Label>
+                  <Select
+                    value={it.responsibility ?? "__default__"}
+                    onValueChange={(v) =>
+                      updateItem(idx, {
+                        responsibility:
+                          v === "__default__" ? undefined : (v as ExpenseResponsibility),
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-56 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__default__">
+                        Padrão do registro ({FUEL_RESP_LABEL[responsibility]})
+                      </SelectItem>
+                      <SelectItem value="minha">Minha despesa</SelectItem>
+                      <SelectItem value="desconto">Frigorífico desconta</SelectItem>
+                      <SelectItem value="ressarcir">Frigorífico ressarce</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Subtotal:{" "}
+                  {formatBRL(
+                    Number(it.quantity || 0) * Number(it.unitPrice || 0) - Number(it.discount || 0),
+                  )}
+                </span>
               </div>
             </div>
           ))}
