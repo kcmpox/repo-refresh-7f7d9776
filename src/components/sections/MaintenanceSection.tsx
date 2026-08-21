@@ -37,7 +37,19 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Calendar, Truck as TruckIcon, FileDown, X, Wrench, User as UserIcon, Lock, Code as Code2 } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Calendar,
+  Truck as TruckIcon,
+  FileDown,
+  X,
+  Wrench,
+  User as UserIcon,
+  Lock,
+  Code as Code2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AttachmentsField, AttachmentsList } from "@/components/Attachments";
 import { Pagination, PAGE_SIZE } from "@/components/Pagination";
@@ -296,199 +308,205 @@ function ExpensesPage() {
       <div className="grid gap-6 md:grid-cols-[220px_1fr]">
         <TruckNav items={navItems} value={truckFilter} onChange={setTruckFilter} />
         <div className="space-y-6">
-      <Card className="p-4 shadow-soft">
-        <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <Label className="text-xs">De</Label>
-            <Input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-44"
-            />
-          </div>
-          <div>
-            <Label className="text-xs">Até</Label>
-            <Input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-44"
-            />
-          </div>
-          <div>
-            <Label className="text-xs">Motorista</Label>
-            <Select value={driverFilter} onValueChange={setDriverFilter}>
-              <SelectTrigger className="w-52">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">Todos</SelectItem>
-                <SelectItem value="__none__">Sem motorista</SelectItem>
-                {drivers.map((d) => (
-                  <SelectItem key={d.id} value={d.id}>
-                    {d.name}
-                    {!d.active ? " ⚰️" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs">Status</Label>
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}
-            >
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">Todos</SelectItem>
-                <SelectItem value="aberto">Em aberto</SelectItem>
-                <SelectItem value="pago">Recebidos</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {(dateFrom ||
-            dateTo ||
-            driverFilter !== "__all__" ||
-            truckFilter !== "__all__" ||
-            statusFilter !== "__all__") && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setDateFrom("");
-                setDateTo("");
-                setDriverFilter("__all__");
-                setTruckFilter("__all__");
-                setStatusFilter("__all__");
-              }}
-            >
-              <X className="mr-1 h-3 w-3" /> Limpar
-            </Button>
+          <Card className="p-4 shadow-soft">
+            <div className="flex flex-wrap items-end gap-3">
+              <div>
+                <Label className="text-xs">De</Label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-44"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Até</Label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-44"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Motorista</Label>
+                <Select value={driverFilter} onValueChange={setDriverFilter}>
+                  <SelectTrigger className="w-52">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todos</SelectItem>
+                    <SelectItem value="__none__">Sem motorista</SelectItem>
+                    {drivers.map((d) => (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.name}
+                        {!d.active ? " ⚰️" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">Status</Label>
+                <Select
+                  value={statusFilter}
+                  onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todos</SelectItem>
+                    <SelectItem value="aberto">Em aberto</SelectItem>
+                    <SelectItem value="pago">Recebidos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {(dateFrom ||
+                dateTo ||
+                driverFilter !== "__all__" ||
+                truckFilter !== "__all__" ||
+                statusFilter !== "__all__") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setDateFrom("");
+                    setDateTo("");
+                    setDriverFilter("__all__");
+                    setTruckFilter("__all__");
+                    setStatusFilter("__all__");
+                  }}
+                >
+                  <X className="mr-1 h-3 w-3" /> Limpar
+                </Button>
+              )}
+              <div className="ml-auto text-right">
+                <p className="text-xs text-muted-foreground">{sorted.length} registro(s)</p>
+                <p className="text-lg font-bold text-primary">{formatBRL(totalValue)}</p>
+              </div>
+            </div>
+          </Card>
+
+          {trucks.length === 0 && (
+            <Card className="p-6 shadow-soft">
+              <p className="text-sm">
+                Cadastre ao menos um{" "}
+                <Link to="/cadastros" className="text-primary underline">
+                  caminhão
+                </Link>{" "}
+                antes de lançar despesas.
+              </p>
+            </Card>
           )}
-          <div className="ml-auto text-right">
-            <p className="text-xs text-muted-foreground">{sorted.length} registro(s)</p>
-            <p className="text-lg font-bold text-primary">{formatBRL(totalValue)}</p>
-          </div>
-        </div>
-      </Card>
 
-      {trucks.length === 0 && (
-        <Card className="p-6 shadow-soft">
-          <p className="text-sm">
-            Cadastre ao menos um{" "}
-            <Link to="/cadastros" className="text-primary underline">
-              caminhão
-            </Link>{" "}
-            antes de lançar despesas.
-          </p>
-        </Card>
-      )}
-
-      {sorted.length === 0 ? (
-        <Card className="p-10 text-center text-muted-foreground">Nenhuma despesa registrada.</Card>
-      ) : (
-        <div className="space-y-3">
-          {paged.map((e) => {
-            const truck = trucks.find((x) => x.id === e.truckId);
-            const driver = drivers.find((x) => x.id === e.driverId);
-            const locked = lockedIds.has(e.id);
-            return (
-              <Card key={e.id} className="p-5 shadow-soft">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge
-                        variant={
-                          e.responsibility === "minha"
-                            ? "destructive"
-                            : e.responsibility === "ressarcir"
-                              ? "default"
-                              : "secondary"
-                        }
-                      >
-                        {RESP_LABEL[e.responsibility]}
-                      </Badge>
-                      {locked && (
-                        <Badge variant="outline" className="border-amber-500 text-amber-600">
-                          <Lock className="mr-1 h-3 w-3" /> Em recebimento
-                        </Badge>
-                      )}
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {formatDateBR(e.date)}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <TruckIcon className="h-3 w-3" />
-                        {truck?.name ?? "—"} ({truck?.plate ?? "—"})
-                      </span>
-                      {driver && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <UserIcon className="h-3 w-3" />
-                          {driver.name}
-                        </span>
-                      )}
+          {sorted.length === 0 ? (
+            <Card className="p-10 text-center text-muted-foreground">
+              Nenhuma despesa registrada.
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {paged.map((e) => {
+                const truck = trucks.find((x) => x.id === e.truckId);
+                const driver = drivers.find((x) => x.id === e.driverId);
+                const locked = lockedIds.has(e.id);
+                return (
+                  <Card key={e.id} className="p-5 shadow-soft">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge
+                            variant={
+                              e.responsibility === "minha"
+                                ? "destructive"
+                                : e.responsibility === "ressarcir"
+                                  ? "default"
+                                  : "secondary"
+                            }
+                          >
+                            {RESP_LABEL[e.responsibility]}
+                          </Badge>
+                          {locked && (
+                            <Badge variant="outline" className="border-amber-500 text-amber-600">
+                              <Lock className="mr-1 h-3 w-3" /> Em recebimento
+                            </Badge>
+                          )}
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {formatDateBR(e.date)}
+                          </span>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <TruckIcon className="h-3 w-3" />
+                            {truck?.name ?? "—"} ({truck?.plate ?? "—"})
+                          </span>
+                          {driver && (
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <UserIcon className="h-3 w-3" />
+                              {driver.name}
+                            </span>
+                          )}
+                        </div>
+                        <p className="flex items-center gap-2 text-base font-semibold">
+                          <Wrench className="h-4 w-4 text-accent" />
+                          {e.category}
+                          {e.description ? (
+                            <span className="text-muted-foreground"> — {e.description}</span>
+                          ) : null}
+                        </p>
+                        {e.notes && (
+                          <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                            {e.notes}
+                          </p>
+                        )}
+                        <AttachmentsList items={e.attachments} />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                            Valor
+                          </p>
+                          <p className="text-2xl font-bold text-primary">{formatBRL(e.value)}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={locked}
+                          onClick={() => {
+                            setEditing(e);
+                            setOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        {settings.editorMode && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Editar JSON"
+                            onClick={() => {
+                              setJsonEditItem(e);
+                              setJsonEditOpen(true);
+                            }}
+                          >
+                            <Code2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={locked}
+                          onClick={() => remove(e.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
-                    <p className="flex items-center gap-2 text-base font-semibold">
-                      <Wrench className="h-4 w-4 text-accent" />
-                      {e.category}
-                      {e.description ? (
-                        <span className="text-muted-foreground"> — {e.description}</span>
-                      ) : null}
-                    </p>
-                    {e.notes && (
-                      <p className="whitespace-pre-wrap text-sm text-muted-foreground">{e.notes}</p>
-                    )}
-                    <AttachmentsList items={e.attachments} />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="text-xs uppercase tracking-wide text-muted-foreground">Valor</p>
-                      <p className="text-2xl font-bold text-primary">{formatBRL(e.value)}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={locked}
-                      onClick={() => {
-                        setEditing(e);
-                        setOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    {settings.editorMode && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title="Editar JSON"
-                        onClick={() => {
-                          setJsonEditItem(e);
-                          setJsonEditOpen(true);
-                        }}
-                      >
-                        <Code2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={locked}
-                      onClick={() => remove(e.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-          <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
-        </div>
-      )}
+                  </Card>
+                );
+              })}
+              <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -519,9 +537,7 @@ function ExpenseDialog({ expense, onSaved }: { expense: Expense | null; onSaved:
     [drivers, expense?.driverId],
   );
 
-  const [date, setDate] = useState(
-    toBrasiliaInput(expense?.date),
-  );
+  const [date, setDate] = useState(toBrasiliaInput(expense?.date));
   const [truckId, setTruckId] = useState(expense?.truckId ?? trucks[0]?.id ?? "");
   const [driverId, setDriverId] = useState(expense?.driverId ?? "");
   const [category, setCategory] = useState(expense?.category ?? "Mecânica");
