@@ -847,11 +847,37 @@ function FuelingDialog({
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
-              <div className="col-span-12 text-right text-xs text-muted-foreground">
-                Subtotal:{" "}
-                {formatBRL(
-                  Number(it.quantity || 0) * Number(it.unitPrice || 0) - Number(it.discount || 0),
-                )}
+              <div className="col-span-12 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs whitespace-nowrap">Responsável</Label>
+                  <Select
+                    value={it.responsibility ?? "__default__"}
+                    onValueChange={(v) =>
+                      updateItem(idx, {
+                        responsibility:
+                          v === "__default__" ? undefined : (v as ExpenseResponsibility),
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-8 w-56 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__default__">
+                        Padrão do registro ({FUEL_RESP_LABEL[responsibility]})
+                      </SelectItem>
+                      <SelectItem value="minha">Minha despesa</SelectItem>
+                      <SelectItem value="desconto">Frigorífico desconta</SelectItem>
+                      <SelectItem value="ressarcir">Frigorífico ressarce</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Subtotal:{" "}
+                  {formatBRL(
+                    Number(it.quantity || 0) * Number(it.unitPrice || 0) - Number(it.discount || 0),
+                  )}
+                </span>
               </div>
             </div>
           ))}
