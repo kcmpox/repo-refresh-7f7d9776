@@ -293,6 +293,9 @@ function ExpensesPage() {
         </div>
       </div>
 
+      <div className="grid gap-6 md:grid-cols-[220px_1fr]">
+        <TruckNav items={navItems} value={truckFilter} onChange={setTruckFilter} />
+        <div className="space-y-6">
       <Card className="p-4 shadow-soft">
         <div className="flex flex-wrap items-end gap-3">
           <div>
@@ -312,22 +315,6 @@ function ExpensesPage() {
               onChange={(e) => setDateTo(e.target.value)}
               className="w-44"
             />
-          </div>
-          <div>
-            <Label className="text-xs">Caminhão</Label>
-            <Select value={truckFilter} onValueChange={setTruckFilter}>
-              <SelectTrigger className="w-52">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">Todos</SelectItem>
-                {trucks.map((tr) => (
-                  <SelectItem key={tr.id} value={tr.id}>
-                    {tr.name} ({tr.plate})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <div>
             <Label className="text-xs">Motorista</Label>
@@ -502,6 +489,8 @@ function ExpensesPage() {
           <Pagination page={safePage} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
+        </div>
+      </div>
 
       <JsonEditorDialog
         open={jsonEditOpen}
